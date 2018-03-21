@@ -1,0 +1,66 @@
+#include <iostream>
+#include <cstdio>
+
+
+struct Triangle {
+	float base,height;
+	double area;
+};
+
+struct Rectangle {
+	float side1, side2;
+	double area;
+};
+
+struct Circle {
+	float radius;
+	double area;
+};
+
+struct Son {
+	struct Triangle triangle;
+	struct Rectangle rectangle;
+	struct Circle circle;
+
+};
+
+int main()
+{
+
+	FILE *f;
+	f = fopen("lab2-2.txt", "r");
+
+	char name[10];
+
+	struct Son mom[10];
+
+	int t = 0;
+	int r = 0;
+	int c = 0;
+	
+	while (!feof(f)) {
+		fscanf(f, "%s", name);
+
+		if (!strcmp(name, "triangle")) {
+			fscanf(f, "%f %f", &mom[t].triangle.base, &mom[t].triangle.height);
+			mom[t].triangle.area = (mom[t].triangle.base*mom[t].triangle.height*0.5);
+			printf("%s %.2f %.2f		%.2f\n", "triangle", mom[t].triangle.base, mom[t].triangle.height,mom[t].triangle.area);
+			++t;
+		}
+		else if (!strcmp(name, "rectangle")) {
+			fscanf(f, "%f %f", &mom[r].rectangle.side1, &mom[r].rectangle.side2);
+			mom[r].rectangle.area = (mom[r].rectangle.side1*mom[r].rectangle.side2);
+			printf("%s %.2f %.2f		%.2f\n", "rectangle", mom[r].rectangle.side1, mom[r].rectangle.side2, mom[r].rectangle.area);
+			++r;
+		}
+		else if(!strcmp(name, "circle")) {
+			fscanf(f, "%f", &mom[c].circle.radius);
+			mom[c].circle.area = (mom[c].circle.radius*mom[c].circle.radius*3.14);
+			printf("%s	%.2f			%.2f\n", "circle", mom[c].circle.radius, mom[c].circle.area);
+			++c;
+		}
+	}
+
+
+	return 0;
+}
