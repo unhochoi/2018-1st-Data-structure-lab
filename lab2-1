@@ -1,0 +1,46 @@
+#include <iostream>
+#include <cstdio>
+
+
+
+int main()
+{
+	FILE *f;
+	f = fopen("lab2-1.txt", "r");
+	int arow[9];
+	int acol[9];
+	int avalue[9];
+
+	int brow[9];
+	int bcol[9];
+	int bvalue[9];
+
+	for (int i = 0; i < 9; ++i) {
+		fscanf(f, "%d %d %d", &arow[i], &acol[i], &avalue[i]);
+		printf("%d %d %d\n", arow[i], acol[i], avalue[i]);
+	}
+	brow[0] = acol[0];
+	bcol[0] = arow[0];
+	bvalue[0] = avalue[0];
+	
+	if (avalue[0] > 0) {
+		int p = 1;
+		for (int i = 0; i < 6; ++i) {  
+			for (int j = 1; j <= 8; ++j) { 
+				if (acol[j] == i) {
+					brow[p] = acol[j];
+					bcol[p] = arow[j];
+					bvalue[p] = avalue[j];
+					p++;
+				}
+			}
+		}
+	}
+
+	printf("\n\n");
+	
+	for (int i = 0; i < 9; ++i) {
+		printf("%d %d %d\n", brow[i], bcol[i], bvalue[i]);
+	}
+
+}
