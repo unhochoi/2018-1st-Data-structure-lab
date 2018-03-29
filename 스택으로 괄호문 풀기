@@ -1,0 +1,44 @@
+//stack으로 괄호문 풀기 
+#include <iostream>
+#include <cstdio>
+#include <string.h>
+#include <stack>
+using namespace std;
+
+int main() {
+	stack<char> st;
+
+	char problem[20];
+
+	int i;
+
+	FILE *f;
+	f = fopen("input2.txt", "r");
+
+	int length;
+	for (int i = 0; i < 4; ++i) {
+		fscanf(f, "%s", &problem);
+		length = strlen(problem);
+		printf("%s ",  problem);
+
+		for (int j = 0; j < length; ++j) {
+			if (problem[j] == '[' || problem[j] == '{' || problem[j] == '(')
+				st.push(problem[j]);
+
+			else {					// 여는 괄호가 아닐 경우 
+				if (problem[j] == ']' && st.top() == '[')
+					st.pop();
+				else if (problem[j] == '}' && st.top() == '{')
+					st.pop();
+				else if (problem[j] == ')' && st.top() == '(')
+					st.pop();
+			}
+		}
+
+		if (st.empty()) //반복문이 끝나고 스택에 괄호가 남아있는가 검사
+			cout << "	 balanced" << endl;
+		else if (!st.empty())
+			cout << "		 unbalanced" << endl;
+	}
+
+}
