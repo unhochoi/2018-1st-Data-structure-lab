@@ -1,0 +1,77 @@
+//중위표기법을 후위표기법으로 
+#include <iostream>
+#include <stack>
+#include <map>
+#include <string>
+
+
+int weight(char mark) {
+	if (mark == ')') {
+		return 3;
+	}
+	else if (mark == '*' || mark == '/') {
+		return 2;
+	}
+	else if (mark == '+' || mark == '-') {
+		return 1;
+	}
+	else {
+		return 0;
+	}
+
+}
+
+
+int main() {
+
+	std::string result;	// 최종 후위 수식 
+
+	std::stack<char> Stack;	//담을 스택 
+
+	std::string begin;		// 중위 표기를 담을 스트링
+	std::cout << "식을 입력하세요 : ";
+	std::cin >> begin;		// 표기 받기
+
+	for (int i = 0; i < begin.size(); ++i) {		//스트링을 돈다.
+
+		if (begin[i] == '(') {
+			Stack.push(begin[i]);
+		}
+
+		else if (begin[i] == ')') {
+			while (Stack.top() != '(') {
+				result += Stack.top();
+				Stack.pop();
+			}
+			Stack.pop();
+		}
+
+		else if (begin[i] == '*' || begin[i] == '/' || begin[i] == '+' || begin[i] == '-') {
+			if (Stack.size() != 0) {	//스택 내부에 기호가 있을 경우
+				if (weight(begin[i]) <= weight(Stack.top())) {		//
+					result += Stack.top();
+					Stack.pop();
+					Stack.push(begin[i]);
+				}
+				else {
+					Stack.push(begin[i]);
+				}
+			}
+			else {
+				Stack.push(begin[i]);
+			}
+		}
+		else if (begin[i] == '$') {
+
+		}
+		else {		// 숫자는 string에 추가 
+			result += begin[i];
+		}
+	}
+	while (Stack.size() != 0) {
+		result += Stack.top();
+		Stack.pop();
+	}
+	std::cout << result << std::endl;
+
+}
