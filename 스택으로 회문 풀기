@@ -1,0 +1,48 @@
+//stack으로 회문 풀기
+#include <iostream>
+#include <cstdio>
+#include <string.h>
+#include <stack>
+using namespace std;
+
+int main() {
+	stack<char> st;
+
+	char problem[20];
+
+	int i;
+
+	FILE *f;
+	f = fopen("input.txt", "r");
+
+	int length;
+	for (int i = 0; i < 4; ++i) {
+		fscanf(f, "%s", &problem);
+		length = strlen(problem);
+		printf("%s ", problem);
+
+		for (int j = 0; j < length/2; ++j) {
+			//abckcba
+			//abbacd
+			//abdeedba
+			st.push(problem[j]);
+			if (problem[length - 1 - j] == st.top()) {
+				st.pop();
+			}
+			else {
+				st.pop();
+				std::cout << "		not a palindrome" << std::endl;
+				break;
+			}
+			if (length % 2 == 1 && j == length - j - 3) {
+				cout << "	palindrome" << endl;
+			}
+			if (j == length - j - 2) {
+				cout << "	palindrome" << endl;
+			}
+			
+		}
+		
+	}
+
+}
