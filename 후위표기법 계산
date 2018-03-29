@@ -1,0 +1,55 @@
+//후위 표기법 계산기 
+#include <iostream>
+#include <stack>
+#include <string>
+
+int main() {
+	std::stack<int> eval;
+	std::stack<char> Answer;
+
+	int op1, op2;
+
+	std::string result;
+	std::cin >> result;
+
+	for (int i = 0; i < result.size(); ++i) {
+		Answer.push(result[result.size() - 1 - i]);
+	}
+
+
+	for (int i = 0; i < result.size(); ++i) {
+		// 연산자일 경우
+		if (Answer.top() == '+' || Answer.top() == '-' || Answer.top() == '*' || Answer.top() == '/') {
+			op1 = eval.top() - '0';//위에 있는거
+			eval.pop();
+			op2 = eval.top() - '0';	//아래 있는거 
+			eval.pop();
+
+			switch (Answer.top()) {
+			case '+':
+				eval.push(op2 + op1);
+				break;
+			case '-':
+				eval.push(op2 - op1);
+				break;
+			case '*':
+				eval.push(op2 * op1);
+				break;
+			case '/':
+				eval.push(op2 / op1);
+				break;
+
+			}
+			Answer.pop();
+
+		}
+		//숫자일 경우 
+		else {
+			eval.push(Answer.top());
+			Answer.pop();
+		}
+
+	}
+	std::cout << eval.top();
+
+}
