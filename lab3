@@ -1,0 +1,90 @@
+#include<iostream>
+#include <cstdio>
+using namespace std;
+int top = -1;
+char buffer[80];
+std::string buffers;
+char stack[80];
+void push(int);
+char pop();
+void isEmpty();
+void isFull();
+
+
+void isEmpty()
+{
+	if (top == -1) {
+		printf("Stack is Empty");
+	}
+}
+void isFull() {
+	if (top != 80) {
+		printf("Stack is not Full");
+	}
+}
+
+
+void push(char num)
+{
+	++top;
+	stack[top] = num;
+}
+char pop()
+{
+	return (stack[--top]);	//stack의 맨위에서 뺀 값.
+}
+
+
+int main()
+{
+
+	FILE *f;
+	f = fopen("input.txt", "r");
+
+	int size = 4;
+
+	printf("Check StackFULL : ");
+	isFull();
+	printf("\nCheck StackEmpty : ");
+	isEmpty();
+	printf("\n");
+
+	for (int i = 0; i < size; ++i) {
+		fscanf(f, "%s", buffer);
+
+		top = -1;
+		printf("%s	", buffer);
+
+		buffers = buffer;		//char배열을 string으로 입력 
+
+		int len = buffers.length();
+
+		int k = 0;
+		
+		if (len % 2 == 0) {
+			for (int j = len / 2; j <= len; ++j) {
+				push(buffers[j]);			//스택에 c b a 순으로 쌓인다.
+			}
+		}
+		else {
+			for (int j = len / 2 + 1; j <= len; ++j) {
+				push(buffers[j]);			//스택에 c b a 순으로 쌓인다.
+			}
+		}
+
+		
+		for (int k = 0; k < len / 2; ++k) {
+
+			if (buffers[k] != pop()) {
+				printf("not a palindrome\n");
+				break;
+			}
+			if (k == len / 2 - 1) {
+				printf("a palindrome\n");
+			}
+			
+		}
+		
+	}
+
+}
