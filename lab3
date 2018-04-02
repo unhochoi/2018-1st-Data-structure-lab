@@ -1,38 +1,9 @@
 #include<iostream>
+#include "Lab3.h"
 #include <cstdio>
 using namespace std;
-int top = -1;
-char buffer[80];
+
 std::string buffers;
-char stack[80];
-void push(int);
-char pop();
-void isEmpty();
-void isFull();
-
-
-void isEmpty()
-{
-	if (top == -1) {
-		printf("Stack is Empty");
-	}
-}
-void isFull() {
-	if (top != 80) {
-		printf("Stack is not Full");
-	}
-}
-
-
-void push(char num)
-{
-	++top;
-	stack[top] = num;
-}
-char pop()
-{
-	return (stack[--top]);	//stack의 맨위에서 뺀 값.
-}
 
 
 int main()
@@ -44,9 +15,14 @@ int main()
 	int size = 4;
 
 	printf("Check StackFULL : ");
-	isFull();
+	if (!isFull()) {
+		printf("Stack is not Full");
+	}
 	printf("\nCheck StackEmpty : ");
-	isEmpty();
+	if (isEmpty()) {
+		printf("Stack is Empty");
+	}
+		
 	printf("\n");
 
 	for (int i = 0; i < size; ++i) {
@@ -60,7 +36,7 @@ int main()
 		int len = buffers.length();
 
 		int k = 0;
-		
+
 		if (len % 2 == 0) {
 			for (int j = len / 2; j <= len; ++j) {
 				push(buffers[j]);			//스택에 c b a 순으로 쌓인다.
@@ -72,7 +48,7 @@ int main()
 			}
 		}
 
-		
+
 		for (int k = 0; k < len / 2; ++k) {
 
 			if (buffers[k] != pop()) {
@@ -82,9 +58,9 @@ int main()
 			if (k == len / 2 - 1) {
 				printf("a palindrome\n");
 			}
-			
+
 		}
-		
+
 	}
 
 }
