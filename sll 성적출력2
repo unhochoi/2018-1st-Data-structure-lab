@@ -1,0 +1,160 @@
+// Data1의 이름 오름차순 출력 
+// Data1에서 A성적 받은사람 이름 오름차순 출력 
+// Data1,Data2 합쳐서 이름 오름차순 출력하기.
+
+#include <iostream>
+#include <string>
+using namespace std;
+
+struct Node {
+	char data;
+	int id;
+	std::string major = "";
+	char grade;
+	Node* next;
+	Node * prev;
+
+};
+
+
+class List		//함수 써주는 클래스
+{
+private:
+	Node * head;
+public:
+	List() { head = 0; }
+	void insertNode(struct Node num);
+	void print();
+	bool isEmpty();
+	void gradeprint(char grade);
+};
+
+bool List::isEmpty()
+{
+	if (head == 0)
+		return true;
+	else
+		return false;
+}
+void List::insertNode(struct Node num)
+{
+	Node* temp = new Node();
+	temp->data = num.data;
+	temp->id = num.id;
+	temp->major = num.major;
+	temp->grade = num.grade;
+	Node* p = NULL;
+	Node* q = NULL;
+	if (head == 0)			//head가 없다면
+	{
+		head = temp;
+	}
+	else if (temp->data <= head->data) {		//head앞에 들감 
+		temp->next = head;
+		head->prev = temp;
+		head = temp;
+	}
+	else
+	{
+		p = head;
+		while ((p != 0) && (p->data < temp->data))		//중간에 들감
+		{
+			q = p;
+			p = p->next;
+		}
+		if (p != 0) {
+			temp->next = p;
+			temp->prev = q;
+			p->prev = temp;
+			q->next = temp;
+		}
+		else
+		{
+			q->next = temp;
+			temp->prev = q;
+			temp->next = NULL;
+		}
+	}
+}
+
+void List::print()		//이름 오름차순 출력 함수 
+{
+	Node *p = NULL;
+	if (!isEmpty())
+	{
+		p = head;
+		cout << "-----  Forward List  -----\n";
+		while (p != 0)
+		{
+			std::cout << p->data << " " << p->id << " " << p->major << " " << p->grade << std::endl;
+			p = p->next;
+		}
+		cout << endl;
+	}
+	else
+		cout << "List is empty!\n";
+}
+
+void List::gradeprint(char grade)		//성적 오름차순 출력 함수 
+{
+	Node *p = NULL;
+	if (!isEmpty())
+	{
+		p = head;
+		cout << "-----  Grade List  -----\n";
+		while (p != 0)
+		{
+			if (p->grade == grade) {
+				std::cout << p->data << " " << p->id << " " << p->major << " " << p->grade << std::endl;
+			}
+			p = p->next;
+		}
+		cout << endl;
+	}
+	else
+		cout << "List is empty!\n";
+}
+int main() {
+
+	FILE *f;
+	f = fopen("Data1.txt", "r");
+
+	struct Node data[10];
+
+	List mList;
+
+
+	for (int i = 0; i < 6; ++i) {
+		char buf[10];
+		int n = 0;
+		fscanf(f, "%s %d %s %s", &data[i].data, &data[i].id, buf, &data[i].grade);
+		while (buf[n] != NULL)
+		{
+			data[i].major += buf[n];
+			++n;
+		}
+		std::cout << data[i].data << " " << data[i].id << " " << data[i].major << " " << data[i].grade << std::endl;
+		mList.insertNode(data[i]);		//구조체 넣는다.
+	}
+
+
+	FILE *f2;
+	f2 = fopen("Data2.txt", "r");
+
+	for (int i = 6; i < 9; ++i) {
+		char buf[10];
+		int n = 0;
+		fscanf(f2, "%s %d %s %s", &data[i].data, &data[i].id, buf, &data[i].grade);
+		while (buf[n] != NULL)
+		{
+			data[i].major += buf[n];
+			++n;
+		}
+		std::cout << data[i].data << " " << data[i].id << " " << data[i].major << " " << data[i].grade << std::endl;
+		mList.insertNode(data[i]);
+	}
+
+
+	mList.print();
+
+}
