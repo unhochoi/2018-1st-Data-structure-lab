@@ -1,0 +1,150 @@
+#include<iostream>
+#include <string>
+
+
+
+int stacktop = -1;
+int queuetop = -1;
+int resulttop = -1;
+
+int stacksize = 2;
+int queuesize = 3;
+int resultsize = 4;
+
+char stack[2];
+char queue[3];
+char result[5];
+
+//stack 함수
+
+void push(char word)
+{
+	stack[++stacktop] = word;
+}
+char pop()
+{
+	return (stack[--stacktop]);	//stack의 맨위에서 뺀 값.
+}
+
+bool stackisEmpty()
+{
+	return (stacktop == -1);
+}
+bool stackisFull() {
+	return (stacktop == 1);
+}
+
+//queue 함수
+
+void enque(char word) {
+	queue[++queuetop] = word;
+}
+char deque() {
+	return (queue[--queuetop]);
+}
+bool queueisEmpty() {
+	return (queuetop == -1);
+}
+bool queueisFull() {
+	return (queuetop == 2);
+}
+
+void resultappend(char word) {
+	result[++resulttop] = word;
+}
+
+std::string input;		//입력받을 스트링
+char word;		//입력받을 문자
+
+int main()
+{
+
+	while (true) {
+		std::cout << "Enter command(PUSH, POP, ENQUE, DEQUE, Displaystack, Displayqueue, quit) : ";		
+		std::cin >> input;
+
+
+		if (input == "PUSH") {
+			if (stackisFull() == false) {
+				std::cout << "word = ";
+				std::cin >> word;
+				push(word);
+			}
+			else {
+				printf("Stack is Full\n");
+			}
+		}
+		else if (input == "POP") {
+			if (stackisEmpty() == false) {
+				//std::cout << stack[stacktop] << " is POP" << std::endl;
+				//pop();
+				if (resulttop != 4) {
+				resultappend(stack[stacktop]);
+				}
+				if (resulttop == 4) {
+					for (int i = 0; i < resulttop+1; ++i) {
+						std::cout << result[i];
+					}
+					printf("\n");
+				}
+				pop();
+			}
+				
+			else {
+				printf("Stack is Empty\n");
+			}
+		}
+		else if (input == "ENQUE") {
+			if (queueisFull() == false) {
+				std::cout << "word = ";
+				std::cin >> word;
+				enque(word);
+			}
+			else {
+				printf("Queue is Full\n");
+			}
+		}
+		else if (input == "DEQUE") {
+			if (queueisEmpty() == false) {
+				//std::cout << queue[queuetop] << " is DEQUE"<< std::endl;				
+				
+				if (resulttop != 4) {
+					resultappend(queue[queuetop]);
+				}
+				if (resulttop == 4) {
+					for (int i = 0; i < resulttop + 1; ++i) {
+						std::cout << result[i];
+					}
+					printf("\n");
+				}
+				
+				deque();
+
+			}
+			else {
+				printf("Queue is Empty\n");
+			}
+		}
+
+
+		else if (input == "Displaystack") {
+			for (int i = 0; i < stacktop+1; ++i) {
+				std::cout << stack[i];
+			}
+			printf("\n");
+		}
+		else if (input == "Displayqueue") {
+			for (int i = 0; i < queuetop + 1; ++i) {
+				std::cout << queue[i];
+			}
+			printf("\n");
+		}
+		else if (input == "quit") {
+			break;
+		}
+		else {
+			std::cout << "Bad command" << std::endl;
+		}
+	}
+
+}
