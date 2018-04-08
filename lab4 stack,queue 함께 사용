@@ -6,6 +6,7 @@
 int stacktop = -1;
 int queuetop = -1;
 int resulttop = -1;
+int queuedown = -1;
 
 int stacksize = 2;
 int queuesize = 3;
@@ -40,10 +41,11 @@ void enque(char word) {
 	queue[++queuetop] = word;
 }
 char deque() {
-	return (queue[--queuetop]);
+	
+	return (queue[++queuedown]);
 }
 bool queueisEmpty() {
-	return (queuetop == -1);
+	return (queuedown == 2);
 }
 bool queueisFull() {
 	return (queuetop == 2);
@@ -60,7 +62,7 @@ int main()
 {
 
 	while (true) {
-		std::cout << "Enter command(PUSH, POP, ENQUE, DEQUE, Displaystack, Displayqueue, quit) : ";		
+		std::cout << "Enter command(PUSH, POP, ENQUE, DEQUE, Displaystack, Displayqueue, quit) : ";
 		std::cin >> input;
 
 
@@ -76,20 +78,19 @@ int main()
 		}
 		else if (input == "POP") {
 			if (stackisEmpty() == false) {
-				//std::cout << stack[stacktop] << " is POP" << std::endl;
 				//pop();
 				if (resulttop != 4) {
-				resultappend(stack[stacktop]);
+					resultappend(stack[stacktop]);
 				}
 				if (resulttop == 4) {
-					for (int i = 0; i < resulttop+1; ++i) {
+					for (int i = 0; i < resulttop + 1; ++i) {
 						std::cout << result[i];
 					}
 					printf("\n");
 				}
 				pop();
 			}
-				
+
 			else {
 				printf("Stack is Empty\n");
 			}
@@ -105,11 +106,10 @@ int main()
 			}
 		}
 		else if (input == "DEQUE") {
-			if (queueisEmpty() == false) {
-				//std::cout << queue[queuetop] << " is DEQUE"<< std::endl;				
-				
+			if (queueisEmpty() == false) {		//큐가 비어있지 않다면 마저 뺀다.
+				deque();
 				if (resulttop != 4) {
-					resultappend(queue[queuetop]);
+					resultappend(queue[queuedown]);
 				}
 				if (resulttop == 4) {
 					for (int i = 0; i < resulttop + 1; ++i) {
@@ -117,8 +117,8 @@ int main()
 					}
 					printf("\n");
 				}
+
 				
-				deque();
 
 			}
 			else {
@@ -128,13 +128,13 @@ int main()
 
 
 		else if (input == "Displaystack") {
-			for (int i = 0; i < stacktop+1; ++i) {
+			for (int i = 0; i < stacktop + 1; ++i) {
 				std::cout << stack[i];
 			}
 			printf("\n");
 		}
 		else if (input == "Displayqueue") {
-			for (int i = 0; i < queuetop + 1; ++i) {
+			for (int i = queuedown + 1; i < queuetop + 1; ++i) {
 				std::cout << queue[i];
 			}
 			printf("\n");
