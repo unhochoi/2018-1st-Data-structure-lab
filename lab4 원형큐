@@ -1,0 +1,117 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+#define MAX 4
+
+int rear = 0;
+int front = 0;
+int Q[MAX];
+
+bool isFull();
+bool isEmpty();
+void enQueue(char item);
+int deQueue();
+
+
+void enQueue(char item)
+{
+	if (isFull())
+	{
+		cout << "Queue is Full" << endl;
+		exit(1);
+	}
+	else//mod 연산 사용
+	{
+		rear = (rear + 1) % MAX;
+		Q[rear] = item;
+		
+	}
+}
+
+
+int deQueue()
+{
+	if (isEmpty())
+	{
+		cout << "Queue is Empty" << endl;
+		exit(1);
+	}
+	else
+	{
+		front = (front + 1) % MAX;
+		return Q[front];
+	}
+}
+
+
+bool isEmpty()
+{
+	if (front == rear)
+		return true;
+	else return false;
+}
+
+
+
+bool isFull()
+{
+	//일반 Queue와 다른 Full 조건
+	if ((rear + 1) % MAX == front)
+		return true;
+	else
+		return false;
+}
+
+std::string input;
+
+int main(void)
+{
+
+	char word;
+	int count = 0;
+
+	while (true) {
+		std::cout << "ENQUE, DEQUE, Displayqueue, quit = ";
+		std::cin >> input;
+
+		if (input == "ENQUE") {
+			if (!isFull()) {
+				std::cout << "word : ";
+				std::cin >> word;
+				enQueue(word);
+				count++;
+			}
+			else {
+				printf("Queue Full\n");
+			}
+			
+		}
+		else if (input == "DEQUE") {
+			if (!isEmpty()) {
+				deQueue();
+				count--;
+			}
+			else {
+				printf("Queue Empty\n");
+			}
+		}
+		else if (input == "Displayqueue") {
+			for (int j = 1; j <= count; j++)
+
+			{
+				printf("%c ", Q[(front + j) % MAX]);
+			}
+			printf("\n");
+			
+		}
+		else if (input == "quit") {
+			break;
+		}
+		else {
+			printf("Bad command");
+		}
+
+	}
+	
+}
