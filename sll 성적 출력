@@ -7,12 +7,12 @@
 #include <string>
 using namespace std;
 
-struct Node {		//Data1의 Name, ID number, Major, Grade 정보를 저장할 구조체 Node를 생성한다.
+struct Node {		//Name, ID number, Major, Grade 정보를 저장하는 구조체 Node이다.
 	char name;
 	int id;
 	std::string major = "";
 	char grade;
-	Node* next;			//이전 주솟값
+	Node* next;			//다음 주솟값
 
 };
 
@@ -26,7 +26,7 @@ public:
 	void print();							//노드를 출력 해주는 함수
 	bool isEmpty();							//list가 비었는지 확인해주는 함수
 	void gradeprint(char grade);			//원하는 성적을 출력해주는 함수 
-	void majorprint(std::string major);
+	void majorprint(std::string major);		//Data1과 Data2를 합쳐 만든 리스트에서 원하는 전공을 출력할 때 사용.
 };
 
 bool List::isEmpty()
@@ -179,4 +179,5 @@ int main() {
 
 
 }
+
 
