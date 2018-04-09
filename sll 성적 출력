@@ -117,7 +117,7 @@ void List::majorprint(std::string major)		//name1과 name2 합쳐 만든 리스�
 	if (!isEmpty())				//리스트가 비어있지 않다면 실행
 	{
 		p = head;				//변수 p에 head를 복사한다.
-		cout << "-----  Grade List  -----\n";
+		cout << "-----  major List  -----\n";
 		while (p != 0)			//p가 0이 아닐 때 까지.
 		{
 			if (p->major == major) {		//p의 grade가 받은 grade 인자와 같다면 
