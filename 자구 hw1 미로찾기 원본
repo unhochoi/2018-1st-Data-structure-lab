@@ -1,0 +1,165 @@
+
+#include "stdafx.h"
+#include <iostream>
+
+
+typedef struct //value 라는 구조체이다. 속성으로는 행 열 방향을 나타내는 row col dir 가 있다.
+{
+	int row;
+	int col;
+	int dir;
+}value;
+
+typedef struct //position 라는 구조체이다. 속성으로는 속성으로는 방향을 말해주는 vert horiz 가 있다.
+{
+	int vert;
+	int horiz;
+}position;
+
+value stack[1000]; //stack 선언
+value pop(); //stack에 있는 값중에 원하는 위치의 값을 반환해준다.
+
+int top;
+void create_stack();					//top을 -1로 만들어준다.
+void push(int row, int col, int dir);	//행,열,방향을 넣어준다.
+void movereset(position move[]);		//move에 이동할때의 위치값을넣어준다.
+void action(int maze[14][17], int mark[14][17]); //길을 찾는 함수
+void print(int mark[14][17]);				//path와 길을 출력
+
+
+void create_stack() { top = -1; }//스텍 생성
+
+void push(int row, int col, int dir)
+{
+	++top;
+	stack[top].row = row;
+	stack[top].col = col;
+	stack[top].dir = dir;
+} //길을 찾았다면 구조체에 해당 행과 열 그리고 방향을 넣어준다.
+
+value pop()
+{
+	return stack[top--];
+}//stack에 있는값중에 가장 최근에 추가한 위치의 값을 반환한다.
+
+void movereset(position move[]) {
+	move[0].vert = -1; move[0].horiz = 0;	/*N*/
+	move[1].vert = -1; move[1].horiz = 1;	/*NE*/
+	move[2].vert = 0; move[2].horiz = 1;	/*E */
+	move[3].vert = 1; move[3].horiz = 1;	/*SE */
+	move[4].vert = 1; move[4].horiz = 0;	// S     
+	move[5].vert = 1; move[5].horiz = -1;   /*SW*/
+	move[6].vert = 0; move[6].horiz = -1;	/*W*/
+	move[7].vert = -1; move[7].horiz = -1;  /*NW*/
+}//move에 이동할때의 위치 값을 넣어준다.
+
+
+void action(int maze[14][17], int mark[14][17]) //길을 찾는 함수
+{
+	value temp; //value라는 구조체의 form을 가진 temp를 선언
+	position move[8];//position이라는 구조체의 form을 가진 move를 선언
+
+	movereset(move);		//이동 위치값을 설정하는 movereset 함수를 불러온다.
+
+	int next_row = 0; //다음 행 위치
+	int next_col = 0; //다음 열 위치
+	int row;
+	int col;
+
+	int final = 0, dir = 2;		//도착시 1로 변환해주는 final값과 방향을 나타내는 dir 선언 
+	while (!final && top != -1)		//final이 1일때까지 즉, 도착할때까지 진행한다.
+	{
+		temp = pop(); //stack애 있는 값중에 최근 위치의 값을 반환해준다.
+		row = temp.row; //초기값 입력
+		col = temp.col; //초기값 입력
+		dir = temp.dir; //초기값 입력
+
+		while (dir < 8 && !final) //시계방향으로 길이 있는지 확인하고 목표에 도달하였는지 확인한다. 
+		{
+			next_row = row + move[dir].vert;  //dir는 방향이므로 전 위치와 더하며 
+			next_col = col + move[dir].horiz; //위치를 이동시키면서 길이 있는지 확인한다.
+			if (next_row == 12 && next_col == 15)  //5,5 즉 출구에 도달하였을 경우 final에 1을 넣어줘서 도착하였음을 알려준다.
+			{
+				final = 1;//도착
+				 mark[next_row][next_col] = 1; //거쳐간 길 표시
+			}
+			else if (!maze[next_row][next_col] && !mark[next_row][next_col]) //maze를 통해 길인지 파악하고 mark를 통해 전에왔던길인지 파악한다.
+			{
+				mark[next_row][next_col] = 1; //거쳐간 길 표시
+				push(row, col, dir+1); //찾은 길을 넣어준다.
+				row = next_row; //현재의 행을넣어준다.
+				col = next_col; //현재의 열을 넣어준다.
+				dir = 0; //방향을 초기화 해준다.
+			}
+			else
+				dir++;   //시계방향으로 위치를 파악하도록 dir에 1을 더해준다.
+		}
+	}
+}
+
+
+void print(int mark[14][17])//path와 길을 출력
+{
+	printf("Matrix path\n");
+	printf("row\tcol\n");
+	printf("***********\n");
+	for (int i = 0; i < 14; i++)//mark 출력
+	{
+		for (int j = 0; j < 17; j++)
+		{
+			if (mark[i][j] != 0)
+				std::cout << i << "\t" << j << std::endl;
+		}
+	}
+	printf("\n");
+	printf("Marked Matrix\n");
+	for (int i = 1; i < 13; i++)//mark 출력
+	{
+		for (int j = 1; j < 16 ; j++)
+			std::cout << ((mark[i][j]!=0)? "@@@" : "...") << " ";
+		std::cout << std::endl;
+	}
+}
+
+int main()
+{
+	create_stack();	//스택을 만든다. 
+	int maze[14][17] = {   //Initialize maze map
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 , 1,
+		1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1 , 1,
+		1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 1 , 1,
+		1, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1 , 1,
+		1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 0 , 1,
+		1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1 , 1,
+		1, 0, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1 , 1,
+		1, 0, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1 , 1,
+		1, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1 , 1,
+		1, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1 , 1,
+		1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0 , 1,
+		1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0 , 1,
+		1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0 , 1,
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
+	};
+	int mark[14][17] = {   //Initialize maze map
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0,
+		0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0 ,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0 ,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0 ,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0
+	};// 갔던 길을 표시하며 (0,0)은 시작점이기 때문에 1로 표현한다.
+	push(1, 1, 2); //시작하는 위치를 설정한다.
+	action(maze, mark);//길을찾는 함수
+	print(mark);//path와 길을 출력
+	system("pause");
+	return 0;
+}
+
