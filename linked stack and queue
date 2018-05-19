@@ -1,0 +1,345 @@
+#include <iostream>
+#include <cstdio>
+#include<string>
+
+
+struct Node {      // 3개의 필드로 구성되는 구조체로 노드를 표현 
+
+	int data;
+	Node* next;      //다음 노드를 가리키는 포인터 변수
+
+};
+
+class linkedstack {
+private:
+	Node * head;            //헤드를 가리키는 포인터 변수 
+public:
+	linkedstack() { head = 0; }
+	bool isEmpty();
+	void push(struct Node num);
+	int pop();
+	void displayStack();
+	Node get(int index);
+};
+
+class linkedqueue {
+private:
+	Node * front;
+	Node* rear;
+public:
+	linkedqueue() {
+		front = 0; rear = 0;
+	}
+	bool isEmpty();
+	void enqueue(struct Node num);
+	int dequeue();
+	void displayqueue();
+	Node get(int index);
+};
+
+
+class sortedlist {
+private:
+	Node * head;
+public:
+	sortedlist() { head = 0; }
+	void insertNode(struct Node num);
+	void sortedprint();
+	bool isEmpty();
+	sortedlist concatenate(linkedstack List1, linkedqueue List2);
+	Node get(int index);
+	void invert();
+};
+
+
+bool linkedstack::isEmpty()         //linkedstack가 비어있는 지 여부 판단 
+{
+	if (head == 0)            //head가 0이라면
+		return true;
+	else                        //head가 있다면
+		return false;
+}
+
+
+void linkedstack::push(struct Node num) {
+
+	Node *temp = new Node();
+	temp->data = num.data;
+
+
+	if (head == 0) {
+		head = temp;
+	}
+	else {
+
+		temp->next = head;
+		head = temp;
+
+	}
+}
+
+int linkedstack::pop() {
+	Node *p;
+	int num;
+
+	num = head->data;
+	p = head;
+	head = head->next;
+	delete p;
+	return num;
+
+}
+
+void linkedstack::displayStack() {
+	Node* p;
+
+	if (!isEmpty()) {
+		p = head;
+		while (p) {
+			printf("%c", p->data);
+			p = p->next;
+		}
+		std::cout << std::endl;
+	}
+	else {
+		std::cout << "Stack is empty!\n";
+	}
+}
+
+Node linkedstack::get(int index) {		//원하는 인덱스의 노드를 리스트에서 뽑아준다.
+	Node* temp = head;
+	for (int i = 0; i < index; ++i) {
+		temp = temp->next;
+	}
+	return *temp;
+}
+
+
+bool linkedqueue::isEmpty()         //linkedstack가 비어있는 지 여부 판단 
+{
+	if (front == 0)            //head가 0이라면
+		return true;
+	else                        //head가 있다면
+		return false;
+}
+
+
+void linkedqueue::enqueue(struct Node num) {
+	Node *temp = new Node();
+	temp->data = num.data;
+
+	if (front == 0) {
+		front = temp;
+		rear = temp;
+	}
+	else {
+		rear->next = temp;
+		rear = temp;
+	}
+
+}
+
+int linkedqueue::dequeue() {
+	Node* p;
+	int num;
+
+	num = front->data;
+	p = front;
+
+	if (front == rear) {
+		front = 0;
+		rear = 0;
+	}
+	else {
+		front = front->next;
+	}
+	delete p;
+	return num;
+}
+
+void linkedqueue::displayqueue() {
+	Node* p;
+
+	if (!isEmpty()) {
+		p = front;
+		while (p) {
+			printf("%c", p->data);
+			p = p->next;
+		}
+		std::cout << std::endl;
+	}
+	else {
+		std::cout << "Queue is empty\n";
+	}
+}
+
+Node linkedqueue::get(int index) {		//원하는 인덱스의 노드를 리스트에서 뽑아준다.
+	Node* temp = front;
+	for (int i = 0; i < index; ++i) {
+		temp = temp->next;
+	}
+	return *temp;
+}
+
+void sortedlist::insertNode(struct Node num) {
+	Node* temp = new Node();				//노드 성질을 가지고 있는 temp 변수 선언.
+	temp->data = num.data;
+
+	Node* p = NULL;							//노드 성질을 가진 변수 p 선언
+	Node* q = NULL;							//노드 성질을 가진 변수 q 선언 
+
+	if (head == 0)			//현재 head가 없다면
+	{
+		head = temp;		//temp를 head로 만든다.
+	}
+	else if (temp->data <= head->data) {		//temp의 name보다 head의 name이 클 경우 head 앞에 temp가 삽입된다.
+		temp->next = head;				//temp의 이후 주소값은 head를 뜻하게 된다.
+		head = temp;					//head는 temp가 된다.
+	}
+	else {					//위의 조건에 해당하지 않는다면 적절한 중간 위치에 temp가 삽입 된다.
+
+		p = head;				//변수 p에 head를 복사한다.
+
+		while ((p != 0) && (p->data < temp->data))		//변수 p가 0이고 temp의 name이 클 때 까지 노드를 찾아간다. 
+		{
+			q = p;									// 변수 q에 p값을 복사한다.
+			p = p->next;							// 변수 p에 p 이후 노드를 가리키는 주소를 넣는다.
+		}
+		if (p != 0) {						//p가 비어있지 않을 경우 즉, 반복문이 중간에 멈췄을 경우
+			temp->next = p;					//temp의 이후 주솟값에는 p를 삽입
+			q->next = temp;					//q의 이후 주솟값은 temp가 된다.
+		}
+		else {					//p가 비어있을 경우 즉, 끝까지 찾았을 경우.
+			q->next = temp;				//q의 이후 주솟 값에 temp를 삽입
+		}
+	}
+
+}
+
+void sortedlist::sortedprint() {
+	Node *p = NULL;		//노드 성질을 가진 변수 p를 설정해 NULL 값으로 초기화 시켜준다.
+
+	if (!isEmpty())		//리스트가 비어있지 않다면 실행
+	{
+		p = head;		//변수 p에 head를 복사한다.
+		while (p != 0)		//p가 0이 아닐 때 까지.
+		{
+			printf("%c", p->data);		//name,id,major,grade 출력
+			p = p->next;																				//p에 다음노드 정보를 넘겨준다.
+		}
+		std::cout << std::endl;
+	}
+	else        //리스트가 비어 있다면
+		std::cout << "List is empty!\n";
+}
+
+bool sortedlist::isEmpty()
+{
+	if (head == 0)            //head가 0이라면
+		return true;
+	else                        //head가 있다면
+		return false;
+}
+
+Node sortedlist::get(int index) {		//원하는 인덱스의 노드를 리스트에서 뽑아준다.
+	Node* temp = head;
+	for (int i = 0; i < index; ++i) {
+		temp = temp->next;
+	}
+	return *temp;
+}
+
+
+sortedlist sortedlist::concatenate(linkedstack List1, linkedqueue List2) //Data1 리스트와 Data2 리스트를 합쳐 새로운 리스트를 만드는 함수 
+{
+
+	sortedlist List3;								//새로운 리스트를 만든다.
+	for (int i = 0; i < 2; ++i) {
+
+		List3.insertNode(List1.get(i));			//Data1의 크기만큼 반복문을 돌려 새로운 리스트에 넣는다.
+
+	}
+
+	for (int i = 0; i < 3; ++i) {
+
+		List3.insertNode(List2.get(i));			//Data2의 크기만큼 반복문을 돌려 새로운 리스트에 넣는다.
+	}
+
+	return List3;									//새로운 리스트를 반환시킨다.
+}
+
+void sortedlist::invert() {
+
+	Node* middle = NULL;
+	Node* trail = NULL;
+
+	while (head != 0)
+	{
+		trail = middle;
+		middle = head;
+		head = head->next;
+		middle->next = trail;
+	}
+	head = middle;
+
+}
+
+int main() {
+
+	linkedstack List1;
+	linkedqueue List2;
+	sortedlist List3;
+
+	Node temp;
+
+	std::string command = "";
+
+
+
+	char word;
+
+	while (true) {
+		std::cout << "명령을 입력하세요(PUSH, POP, ENQUE, DEQUE, Displaylist1, Displaylist2, Displaylist3, Displaylist4, quit) : ";
+		std::cin >> command;
+
+		if (command == "PUSH") {
+			std::cout << "word is ";
+			std::cin >> word;
+			temp.data = word;
+			List1.push(temp);
+		}
+		else if (command == "POP") {
+			List1.pop();
+		}
+		else if (command == "ENQUE") {
+			std::cout << "word is ";
+			std::cin >> word;
+			temp.data = word;
+			List2.enqueue(temp);
+		}
+		else if (command == "DEQUE") {
+			List2.dequeue();
+		}
+		else if (command == "Displaylist1") {
+			List1.displayStack();
+		}
+		else if (command == "Displaylist2") {
+			List2.displayqueue();
+		}
+		else if (command == "Displaylist3") {
+			List3 = List3.concatenate(List1, List2);
+			List3.sortedprint();
+		}
+		else if (command == "Displaylist4") {
+			List3.invert();
+			List3.sortedprint();
+		}
+		else if (command == "quit") {
+			break;
+		}
+		else {
+			printf("Bad command\n");
+		}
+	}
+
+}
