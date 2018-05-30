@@ -1,0 +1,269 @@
+#include <iostream>
+#include <fstream>
+using namespace std;
+
+const int MAX = 10;		//수정해야함(인풋갯수)
+
+bool visited[MAX];
+bool visited1[MAX];
+
+
+int weightgraph[6][6] = {100,6,1,5,100,100,
+						6,100,4,100,3,100,
+						1,4,100,5,6,5, 
+						5,100,5,100,100,2, 
+						100,3,6,100,100,6, 
+						100,100,5,2,6,100};
+
+class Node {
+private:
+	int vertex;
+	int cost;
+	Node* next;
+	Node* prev;
+public:
+	Node() {
+	}
+	int getvertex() {
+		return this->vertex;
+	}
+	int getcost() {
+		return this->cost;
+	}
+	void setcost(int cost) {
+		this->cost = cost;
+	}
+	void setvertex(int vertex) {
+		this->vertex = vertex;
+	}
+	Node* getprev() {
+		return this->prev;
+	}
+	void setprev(Node* prev) {
+		this->prev = prev;
+	}
+
+	Node(int num,int cost) :vertex(num),cost(cost), next(NULL) {}
+	friend class Graph;
+};
+
+class Graph {
+private:
+	Node* graph[MAX];
+	Node* front;
+	Node* rear;
+public:
+	Graph() :front(NULL), rear(NULL) {}
+	void Graph_graph_init();
+	void Graph_visited_init();
+	void Graph_insert(int from, int to,int cost);
+	void Graph_display();
+	Node* method1(int start);
+	Node* method2(int start);
+};
+
+void Graph::Graph_graph_init()		//graph배열을 NULL로!
+{
+	for (int i = 0; i<MAX; i++)
+		graph[i] = NULL;
+}
+
+void Graph::Graph_visited_init()	//visited배열을 NULL로!
+{
+	for (int i = 0; i<MAX; i++)
+		visited[i] = 0;
+	for (int i = 0; i<MAX; i++)
+		visited1[i] = 0;
+}
+
+void Graph::Graph_insert(int from, int to,int cost)// 노드를 연결해 그래프 만드는 함수
+{
+	if (graph[from] == NULL)	//해당 vertex가 비어있다면 node 넣기
+	{
+		Node* temp_1 = new Node(from,cost);
+		graph[from] = temp_1;
+	}
+	if (graph[to] == NULL)
+	{
+		Node* temp_2 = new Node(to,cost);
+		graph[to] = temp_2;
+	}
+
+	//from 노드의 마지막 next에 to 노드 추가
+	Node* p = graph[from];
+	Node* temp1 = new Node(to,cost); //to 노드를 temp1에 생성
+	while (p->next != NULL)
+		p = p->next;
+	p->next = temp1;	//마지막 p의 next는 temp1이 됨.
+
+						//to 노드의 마지막 next에 from 노드 추가 
+	p = graph[to];
+	Node* temp2 = new Node(from,cost);
+	while (p->next != NULL)
+		p = p->next;
+	p->next = temp2;
+}
+
+void Graph::Graph_display()		//인접 리스트 출력
+{
+	for (int i = 0; i<MAX; i++)
+	{
+		if (graph[i] != NULL) {
+			Node* p = graph[i];
+			while (p != NULL) {
+				cout << p->vertex << " ";
+				p = p->next; 
+			}
+			cout << endl;
+		}
+	}
+}
+
+Node* Graph::method1(int start) {
+
+	Node* p;
+	Node* min_v = new Node();
+	min_v->cost = 999999;
+	min_v->vertex = -1;
+	visited[start] = 1;
+
+	for (p = graph[start]; p; p = p->next) {
+		if (!visited[p->vertex])
+		{
+			if (min_v->cost > p->cost)
+			{
+				min_v->cost = p->cost;
+				min_v->vertex = p->vertex;
+			}
+		}
+	}
+
+	return min_v;
+}
+
+Node* Graph::method2(int start) {
+	Node* p1;
+	Node* min_v1 = new Node();
+	min_v1->cost = 999999;
+	min_v1->vertex = -1;
+	visited1[start] = 1;	//시작은 방문해준다.
+
+	for (p1 = graph[start]; p1; p1 = p1->next) {	
+		if (!visited1[p1->vertex])			//방문안한것들중에 최솟값구한다.	
+		{
+			if (min_v1->cost > p1->cost)
+			{	
+				min_v1->prev = graph[start];		//최소를 구했을 때 이전 노드 기억
+				min_v1->cost = p1->cost;
+				min_v1->vertex = p1->vertex;
+			}
+		}
+	}
+
+	return min_v1;
+}
+
+int main(void)
+{
+	Graph g;
+	g.Graph_graph_init();
+	g.Graph_visited_init();
+	ifstream inStream;
+	inStream.open("input.txt");
+	int from, to;
+	int cost;
+	int V = 6;						//노드의 갯수 수정해야함
+	int find;
+
+	for (int i = 0; i < MAX; i++)
+	{
+		inStream >> from >> to >> cost;
+		g.Graph_insert(from, to, cost);
+	}
+
+	for (int i = 0; i < 6; ++i) {
+		for (int j = 0; j < 6; ++j) {
+			std::cout << weightgraph[i][j] << " ";
+		}
+		std::cout << std::endl;
+	}
+	std::cout << std::endl;
+	cout << "시작할 노드번호 입력 : ";
+	std::cin >> find;
+	int find1 = find;
+	int count = 0;		//현재까지 이은 간선의 갯수
+	int sum = 0;
+	int sum1 = 0;
+	while (count < V - 1)
+	{
+		Node* min = new Node();
+		min = g.method1(find);		//find 점과 연결돼있는 노드들중 최소비용 노드 반환
+
+		if (visited[find] != visited[min->getvertex()]) {		//사이클 검사
+			visited[find] = 1;
+			visited[min->getvertex()] = 1;
+			count++;
+			sum += min->getcost();
+			std::cout << find+1 << "," << min->getvertex()+1 << "   ";
+		}
+		else {
+			continue;
+		}
+		find = min->getvertex();
+
+	}
+	std::cout << std::endl;
+	std::cout << "Method1's cost sum = " << sum << std::endl;
+	std::cout << std::endl;
+
+
+
+	count = 0;
+	while (count < V - 1) {
+
+		Node* min1 = new Node();
+		min1 = g.method2(find1);		//find 점과 연결돼있는 노드들중 최소비용 노드 반환
+
+		if (visited1[find1] != visited1[min1->getvertex()]) {//사이클 검사
+			visited1[find1] = 1;
+			visited1[min1->getvertex()] = 1;
+			count++;
+			sum1 += min1->getcost();
+			std::cout << find1+1 << "," << min1->getvertex()+1 << "   ";
+		}
+		else {
+			continue;
+		}
+
+
+		
+
+		//현재 인접 노드들중 최소 노드 뽑아옴
+		while (count < V - 1) {
+
+			Node* small = new Node();
+			small->setcost(999);
+			small->setvertex(-1);
+
+			for (int i = 0; i < V; ++i) {
+				if (visited1[i] == 1) {
+					if (small->getcost() > g.method2(i)->getcost()) {//최솟값 노드 비교
+						small->setcost(g.method2(i)->getcost());
+						small->setvertex(g.method2(i)->getvertex());
+						small->setprev(g.method2(i)->getprev());
+					}
+				}
+
+			}
+			visited1[small->getprev()->getvertex()] = 1;
+			visited1[small->getvertex()] = 1;
+			std::cout << small->getprev()->getvertex()+1 << "," << small->getvertex()+1 << "   ";
+			count++;
+			sum1 += small->getcost();
+		}
+		std::cout << std::endl;
+		std::cout << "Method2's cost sum = " << sum1 << std::endl;
+	}
+	inStream.close();
+	return 0;
+}
