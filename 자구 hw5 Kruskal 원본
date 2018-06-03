@@ -65,7 +65,7 @@ void kruskal() {		//Kruskal's MST를 출력하는 함수입니다.
 	for (int i = 0; i < MAX; ++i) {		//간선의 개수만큼 반복문을 돌립니다.
 		if (unionfind[mst[i].x] < unionfind[mst[i].y]) {	//mst[i]의 두 정점을 비교해 mst[i].x의 부모가 mst[i].y의 부모보다 작다면
 			int find = unionfind[mst[i].y];			//숫자가 큰 부모를 find라는 변수에 임시 저장합니다.
-			for (int j = 0; j < MAX; ++j) {
+			for (int j = 0; j < V; ++j) {
 				if (unionfind[j] == find) {		//숫자가 큰 부모인 find값과 같은 부모들을 모두 작은 부모 값으로 바꿔줍니다.
 					unionfind[j] = unionfind[mst[i].x];
 				}
@@ -76,7 +76,7 @@ void kruskal() {		//Kruskal's MST를 출력하는 함수입니다.
 		}
 		else if (unionfind[mst[i].x] > unionfind[mst[i].y]) {	//mst[i]의 두 정점을 비교해 mst[i].y의 부모가 mst[i].x의 부모보다 작다면
 			int find = unionfind[mst[i].y];			//숫자가 큰 부모를 find라는 변수에 임시 저장합니다.
-			for (int j = 0; j < MAX; ++j) {
+			for (int j = 0; j < V; ++j) {
 				if (unionfind[j] == find) {		//숫자가 큰 부모인 find값과 같은 부모들을 모두 작은 부모 값으로 바꿔줍니다.
 					unionfind[j] = unionfind[mst[i].y];
 				}
