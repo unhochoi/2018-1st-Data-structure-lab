@@ -1,0 +1,162 @@
+// 함수 1) findnum 2)insertnum 3)deletenum 4)printtable
+//메뉴 1.Find 2.Insert 3.Delete 4.Quit
+//Insert 7 - insert 36 - find 7 - insert 29 - insert 22 - find 25 - delete 22  
+// 결과 : (7, 36, _, _, _, _, _) -> Found 7 -> (7, 36, 29, 22, _, _, _) 
+// -> Not found -> (7, 36, 29, _, _, _, _),
+
+#include <iostream>
+#include <cstdlib>
+#define MaxSize 7
+struct hashtable
+{
+	int num = NULL;
+	bool empty = true;
+};
+
+hashtable htable[MaxSize];
+
+int hash(int num) { return num % MaxSize; }
+
+int findKey(int num, int& index) // Linear Probing으로 확장/num가 있는지
+{
+	
+	int found = 0;
+	index = hash(num);		//인덱스를 재설정한다.
+	int loop = 0;
+	int index_ = index;		//처음 인덱스를 index_에 저장한다.
+
+	//해당 htable이 비어있고 아직 못찾았으며 loop를 다 안 돌았을 때까지
+	while (found == false && loop == false) {
+
+		if (htable[index].empty == true) {		//해당 배열이 비어있다면
+			found = 1;
+			return found;
+		}
+		if (htable[index].empty == false && loop == false) {	//해당 배열이 차있다면
+			index = (index + 1) % MaxSize;
+			if (index == index_) {
+				loop = true;
+				return found;
+			}
+		}
+		
+
+	}
+}
+
+
+int insertKey(int num)
+{
+	int index = 0;
+
+	bool check = findKey(num, index);	//num이 있는지 없는지 
+
+	if (check == false)//배열안에 넣을 공간을 못찾았다면
+		return false;// 이미 있으므로 insert 실패
+	else//배열안에 넣을 공간을 찾았다면
+	{
+		htable[index].num = num;
+		htable[index].empty = false;
+		return true;		//insert 완료했다는 표시
+	}
+}
+
+int deleteKey(int num)
+{
+	int index = 0;
+
+	for (int i = 0; i < MaxSize; ++i) {
+		if (htable[i].num == num) {
+			htable[i].num = NULL;
+			htable[i].empty = true; // 해당 htable을 empty시켜준다.
+			return true;		//delete완료
+
+		}
+	}
+	int check = findKey(num, index);
+
+	if (check == false) {
+		std::cout << "그런거 없습니다." << std::endl;
+		return false;		//delete실패
+	}
+	else {
+		htable[index].num = 0;
+		htable[index].empty = true; // 해당 htable을 empty시켜준다.
+		return true;		//delete완료
+	}
+}
+
+void printtable()
+{
+	std::cout << "(";
+	for (int i = 0; i < MaxSize; ++i)
+	{
+		if (htable[i].empty == false)	//차있다면 
+			std::cout << htable[i].num;
+		else
+			std::cout << "_";
+		if (i != MaxSize - 1)
+			std::cout << ",";
+	}
+	std::cout << ")" << std::endl;
+}
+
+void search(int num) {
+
+	bool find = false;
+	for (int i = 0; i < MaxSize; ++i) {
+		if (htable[i].num == num) {
+			find = true;
+		}
+	}
+	if (find == true) {
+		std::cout << "Found " << num << std::endl;
+	}
+	else {
+		std::cout << "Not Found" << std::endl;
+
+	}
+}
+int main() {
+
+	int input = 0;		//명령 번호
+	int num = 0;		//넣는 수
+	int index = 0;
+
+	while (true)
+	{
+		std::cout << " [1.Find, 2.Insert, 3.Delete, 4.Quit] " << std::endl;
+		std::cout << "원하는 명령 번호를 입력해주세요 : ";
+		std::cin >> input;
+		switch (input)
+		{
+		case 1:
+			std::cout << "찾으시는 수를 써주세요 : ";
+			std::cin >> num;
+			search(num);
+			break;
+		case 2:
+			std::cout << "넣고 싶은 수를 써주세요 : ";
+			std::cin >> num;
+			insertKey(num);
+			printtable();
+			break;
+		case 3:
+			std::cout << "지우고 싶은 수를 써주세요 : ";
+			std::cin >> num;
+			deleteKey(num);
+			printtable();
+			break;
+		case 4:
+			std::cout << "프로그램을 종료 합니다. " << " ";
+			exit(1);
+		defalut:
+			std::cout << "잘못 입력하셨습니다." << std::endl;
+		}
+	}
+	return 0;
+
+
+
+
+}
