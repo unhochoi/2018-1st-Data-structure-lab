@@ -1,0 +1,556 @@
+
+#include<iostream>
+#include <string>
+#include <queue>
+class Node {				//Node 에는 right, left, key, prev, next, height가 있다.
+private:
+	int key;
+	Node* right;
+	Node* left;
+	Node* prev;
+	Node* next;
+	int height;
+	friend class Tree;
+public:
+	Node() {}
+	Node(int key) {
+		this->key = key;
+		left = NULL;
+		right = NULL;
+		prev = NULL;
+		next = NULL;
+		height = -1;
+	}
+	~Node() {}
+};
+
+
+class Tree {				//tree에 사용될 root와 사용되는 함수
+private:
+	Node * root;			//root 노드
+public:
+	Tree() {
+		root = NULL;
+	}
+	Node* search_BST(Node* ptr,int key);		 //트리에 해당 key가 있는지 찾는 함수
+	void insert_BST(int key);					 //트리에 노드를 넣는 insert 함수
+	void delete_(int key);						 //delete 함수를 호출하는 함수
+	void delete_BST(Node* ptr,int key);		     //트리의 노드를 삭제하는 delete 함수
+	int height(Node* ptr);						 //트리의 높이를 출력하는 함수
+	int noNodes(Node* ptr);						 //트리의 노드 개수를 출력하는 함수
+	Node* minNode(Node* ptr);					 //트리에서 가장 작은 값 찾는 함수
+	Node* maxNode(Node* ptr);					 //트리에서 가장 큰 값 찾는 함수
+	void drawTree();							 //트리를 그리는 함수
+	void drawTree_BST(Node* ptr, int level);	 //트리를 그리는 재귀함수
+	void callinorder();							 //inorder 함수를 호출하는 함수
+	void inorder(Node *ptr);					 //트리를 inorder로 출력하는 함수
+};
+
+
+Node* Tree::search_BST(Node* ptr, int key)		//트리에 해당 key가 있는지 찾는 함수
+{
+	Node* p = ptr;								//매개변수 ptr을 노드 p로 복사
+
+	while (p != NULL) {							//노드 p가 NULL이 아니라면
+		if (key == p->key) {					//찾고자하는 key와 p의 key가 같다면
+			return p;
+		}
+		if (key < p->key) {					//찾고자하는 key보다 p의 key가 작다면
+			p = p->left;
+		}
+		else {									//찾고자하는 key보다 p의 key가 크다면
+			p = p->right;
+		}
+	}
+	return p; //못 찾은 경우에 p는 NULL
+
+}
+
+void Tree::insert_BST(int key) //트리에 노드를 넣는 insert 함수
+{
+	Node* p = root;				//트리의 root를 p로 설정
+	Node* q = p;				//p를 부모 노드 역할인 q에 복사
+
+	while (p != NULL) {			//트리에 노드가 있다면
+		q = p;					//p를 부모 노드 역할인 q에 복사
+
+		if (key < p->key) {	//new key가 p의 key보다 작다면 왼쪽 노드로 이동
+			p = p->left;
+		}
+		else {					//new key가 p의 key보다 크다면 오른쪽 노드로 이동
+			p = p->right;
+		}
+	}
+
+	Node* temp = new Node(key);	//매개변수로 받은 key를 가지고 있는 노드를 생성
+
+	if (root == NULL) {			//공백 이원 탐색 트리인 경우 루트를 new 노드로 생성
+		root = temp;
+	}
+	else if (key < q->key) {	//new key가 부모 노드 q의 key보다 작다면 
+		q->left = temp;			//q의 왼쪽은 new key
+		q->next = temp;			//q의 다음 노드는 new key
+		temp->prev = q;			//new key의 이전 노드는 q
+	}
+	else {						//new key가 부모 노드 q의 key보다 크다면 
+		q->right = temp;		//q의 오른쪽은 new key
+		q->next = temp;			//q의 다음 노드는 new key
+		temp->prev = q;			//new key의 이전 노드는 q
+	}
+
+}
+void Tree::delete_(int key)		//delete 함수를 호출하는 함수
+{
+	Node* ptr = root;
+	delete_BST(ptr, key);
+}
+
+void Tree::delete_BST(Node* ptr, int deleteKey) {		//트리의 노드를 삭제하는 delete 함수
+
+	Node* p = search_BST(ptr,deleteKey);				//search 함수를 통해 찾는 노드를 p로 설정
+	Node* q = p->prev;									//p의 부모 노드를 q로 설정 
+
+	if (p == NULL) {	//트리 내부에 삭제하고자하는 키가 없는 경우
+		return;
+	}
+	else {				//트리 내부에 삭제하고자하는 키가 있는 경우 
+
+		if (q == NULL) {	//삭제하고자하는 키가 루트 노드인 경우
+
+			if (p->left == NULL & p->right == NULL) {			//루트 노드의 차수가 0인 경우
+				root = NULL;
+			}
+			else if (p->left == NULL || p->right == NULL) {		//루트 노드의 차수가 1인 경우
+
+				if (p->left != NULL) {							//루트 노드의 왼쪽에 자식이 있을 경우
+
+					root = p->left;								//왼쪽 자식으로 루트를 이동
+					if (root->left == NULL & root->right == NULL) {	//루트 이동 후에 트리 안에 루트만 남았을 경우
+						root->prev = NULL;							//루트 이전 노드들의 주소를 초기화한다.
+					}
+
+				}
+				else {											//루트 노드의 오른쪽에 자식이 있을 경우
+
+					root = p->right;							//오른쪽 자식으로 루트를 이동
+					if (root->left == NULL & root->right == NULL) { //루트 이동후에 트리 안에 루트만 남았을 경우
+						root->prev = NULL;							//루트 이전 노드들의 주소를 초기화한다.
+					}
+				}
+			}
+		}
+
+		if (q != NULL) { //삭제하고자하는 키가 루트 노드가 아닌 내부 노드일 경우
+
+			if (p->left == NULL & p->right == NULL) {	//삭제할 노드의 차수가 0인 경우
+
+				if (q->left == p) {						//삭제할 노드가 부모의 왼쪽일 경우
+					q->left = NULL;
+				}
+				else {									//삭제할 노드가 부모의 오른쪽일 경우
+					q->right = NULL;
+				}
+			}
+			else if (p->left == NULL || p->right == NULL) {  //삭제할 노드의 차수가 1인 경우
+
+				if (p->left != NULL) {						//삭제할 노드의 왼쪽에 자식이 있을 경우
+
+					if (q->left == p) {						//삭제할 노드가 부모의 왼쪽일 경우
+						q->left = p->left;					//부모 노드 q와 p의 왼쪽 노드를 연결
+						p->left->prev = q;					//p의 왼쪽 노드와 부모 노드 q를 연결
+						if (q == root) {					//부모 노드가 루트 노드라면 부모 노드의 이전 노드 기억을 지운다.
+							q->prev = NULL;
+						}
+					}
+					else {									//삭제할 노드가 부모의 오른쪽일 경우
+						q->right = p->left;					//부모 노드 q와 p의 왼쪽 노드를 연결
+						p->left->prev = q;					//p의 왼쪽 노드와 부모 노드 q를 연결
+						if (q == root) {					//부모 노드가 루트 노드라면 부모 노드의 이전 노드 기억을 지운다.
+							q->prev = NULL;
+						}
+					}
+				}
+				else {							//삭제할 노드의 오른쪽에 자식이 있을 경우
+
+					if (q->left == p) {			//삭제할 노드가 부모의 왼쪽일 경우
+						q->left = p->right;		//부모 노드 q와 p의 오른쪽 노드를 연결
+						p->right->prev = q;		//p의 오른쪽 노드와 부모 노드를 연결
+						if (q == root) {		//q가 루트 노드라면 q->prev 초기화
+							q->prev = NULL;
+						}
+					}
+					else {						//삭제할 노드가 부모의 오른쪽일 경우
+						q->right = p->right;	//부모 노드 q와 p의 오른쪽 노드를 연결
+						p->right->prev = q;		//p의 오른쪽 노드와 부모 노드를 연결
+						if (q == root) {		//q가 루트 노드라면 q->prev 초기화
+							q->prev = NULL;
+						}
+					}
+				}
+			}
+		}
+
+		if (p->left != NULL & p->right != NULL){	//삭제할 노드의 차수가 2인 경우
+
+			Node* r = NULL;
+			int flag;							//트리의 왼쪽 노드를 지울지 오른쪽 노드를 지울지 정하는 flag 변수
+
+			int lh = height(p->left);			//트리의 왼쪽 높이를 저장하는 변수
+			int rh = height(p->right);			//트리의 오른쪽 높이를 저장하는 변수
+
+			if (lh > rh) {				//p의 왼쪽 서브트리 높이가 오른쪽 서브트리 높이보다 높을 때
+				r = maxNode(p->left);	//r 노드는 p의 왼쪽 서브트리의 가장 큰 노드
+				flag = 0;
+			}
+			else if (lh < rh) {			//p의 오른쪽 서브트리 높이가 왼쪽 서브트리 높이보다 높을 때
+				r = minNode(p->right);	//r 노드는 p의 오른쪽 서브트리의 가장 작은 노드
+				flag = 1;
+			}
+			else {						//p의 왼쪽 서브트리와 오른쪽 서브트리의 높이가 같을 때
+
+				if (noNodes(p->left) >= noNodes(p->right)) {	//p의 왼쪽 서브트리의 노드 개수가 오른쪽 서브트리의 노드 개수보다 많을 때
+					r = maxNode(p->left);						//r 노드는 p의 오른쪽 서브트리의 가장 작은 노드
+					flag = 0;
+				}
+				else {											//p의 오른쪽 서브트리의 노드 개수가 왼쪽 서브트리의 노드 개수보다 많을 때
+					r = minNode(p->right);						//r 노드는 p의 왼쪽 서브트리의 가장 큰 노드
+					flag = 1;
+				}
+			}
+
+			p->key = r->key;			//p의 키를 r의 키로 전환
+
+			if (flag == 0) {
+				delete_BST(p->left,r->key);		//r 노드를 지운다.
+			}
+			else {
+				delete_BST(p->right, r->key);	//r 노드를 지운다.
+			}
+		}
+	}
+}
+
+int Tree::height(Node* root)			//트리의 높이를 출력하는 함수
+{
+
+	std::queue<Node*> q;				//기본 구조가 Node인 queue 생성
+	Node* lastnode = NULL;				
+	root->height = 0;					//매개변수로 가져온 노드의 높이를 0으로 초기화
+	
+	q.push(root);						//queue에 매개변수로 가져온 노드를 넣는다.
+
+	while (!q.empty())					//queue가 빌때까지 진행!
+	{
+		lastnode = q.front();			//queue의 맨 아래에 있는 노드를 lastnode로 설정
+
+		q.pop();						//queue의 맨 아래에 있는 노드를 뺀다.
+
+		if (lastnode->left != NULL) {	//방금 뺀 노드의 왼쪽 자식이 있다면!
+			lastnode->left->height = lastnode->height + 1;		//왼쪽 자식의 height를 방금 뺀 노드의 height보다 +1 하여 저장한다.
+			q.push(lastnode->left);								//왼쪽 자식을 queue에 넣는다.
+		}
+
+		if (lastnode->right != NULL) {	//방금 뺀 노드의 오른쪽 자식이 있다면!
+			lastnode->right->height = lastnode->height + 1;		//오른쪽 자식의 height를 방금 뺀 노드의 height보다 +1 하여 저장한다.
+			q.push(lastnode->right);							//오른쪽 자식을 queue에 넣는다.
+		}
+	}
+	return lastnode->height;									//마지막으로 빼지는 노드의 height를 반환한다.
+}
+
+int Tree::noNodes(Node* ptr) {	//트리의 노드 개수를 구하는 알고리즘
+
+	int count = 0;				//트리의 노드 개수를 저장하는 변수
+
+	if (ptr != NULL) {			//ptr이 빌 때까지
+		count = 1 + noNodes(ptr->left) + noNodes(ptr->right);	//(재귀함수)트리의 노드 개수는 왼쪽 서브트리의 노드 개수 + 오른쪽 서브트리의 노드 개수
+	}
+	return count;				//트리의 노드 개수를 반환
+}
+
+Node* Tree::minNode(Node* ptr)		//right subtree에서 가장 작은 노드 선택 
+{
+	if (ptr->left == NULL)
+	{
+		return ptr;					//left가 비어있으면 해당 ptr 반환
+	}
+	else
+		minNode(ptr->left);			//left가 비어있을 때까지 탐색
+}
+
+Node* Tree::maxNode(Node* ptr)		//left subtree에서 가장 큰 노드 선택 
+{
+	if (ptr->right == NULL)
+	{
+		return ptr;					//right가 비어있으면 해당 ptr 반환
+	}
+	else
+		maxNode(ptr->right);		//right가 비어있을 때까지 탐색
+}
+
+void Tree::drawTree()				//root가 NULL이 아니면 drawTree_BST를 실행시키고 NULL이면 Tree가 없다고 출력한다.
+{
+	Node* ptr = root;				//root 노드를 ptr로 설정
+
+	std::cout << std::endl;
+	if (ptr != NULL) {			//ptr이 NULL이 아니라면
+
+		drawTree_BST(ptr, 1);		//drawTree_BST 함수 호출
+	}
+	else {				//ptr이 NULL이라면 Tree가 없다고 출력
+
+		std::cout << "Tree not Exist" << std::endl;
+	}
+	std::cout << std::endl;
+
+}
+
+void Tree::drawTree_BST(Node* ptr, int level)		//draw tree 재귀함수, 가장 우측 부터 출력하여 준다
+{
+	if (ptr != 0 && level <= 7) {
+
+		drawTree_BST(ptr->right, level + 1);											//우측 노드로 진입한다.
+
+		for (int i = 1; i <= (level - 1); i++)
+			std::cout << "      ";														//노드의 level 만큼 공백을 출력해준다.
+		std::cout << ptr->key;															//노드의 값을 출력해준다. 
+
+		if (ptr->left != 0 && ptr->right != 0) std::cout << " <" << std::endl;			//자식 노드가 왼쪽, 오른쪽 모두 있을 경우
+		else if (ptr->right != 0) std::cout << " ↗" << std::endl;						//자식 노드가 오른쪽에만 있을 경우
+		else if (ptr->left != 0) std::cout << " ↘" << std::endl;						//자식 노드가 왼쪽에만 있을 경우
+		else std::cout << std::endl;
+
+		drawTree_BST(ptr->left, level + 1);												//좌측 노드로 진입한다.
+	}
+}
+
+void Tree::callinorder()	//inorder 호출하는 함수
+{
+	Node* ptr = root;	//ptr에 root 복사 
+
+	std::cout << "Inorder : ";
+
+	inorder(ptr);		//inorder 함수 호출 
+
+	std::cout << std::endl;
+}
+
+void Tree::inorder(Node *ptr)	//트리를 inorder로 출력하는 함수
+{
+								//ptr은 head를 복사한 값이다.
+
+	if (ptr) {					//ptr이 있다면
+		inorder(ptr->left);		//(재귀함수) 왼쪽 노드로 접근
+		std::cout << ptr->key << " ";	//ptr의 key 출력
+		inorder(ptr->right);	//(재귀함수) 오른쪽 노드로 접근
+	}
+	else {
+		return;
+	}
+}
+
+int main()
+{
+	Tree bsttree;			//Tree 선언
+
+	//삽입 8  18  11  5  15  4  9  1  7  17  6  14  10  3  19  20
+	bsttree.insert_BST(8);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.insert_BST(18);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.insert_BST(11);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.insert_BST(5);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.insert_BST(15);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.insert_BST(4);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.insert_BST(9);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.insert_BST(1);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.insert_BST(7);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.insert_BST(17);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.insert_BST(6);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.insert_BST(14);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.insert_BST(10);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.insert_BST(3);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.insert_BST(19);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.insert_BST(20);
+	bsttree.callinorder();
+	bsttree.drawTree();
+
+	//삭제 1 (삽입 순서와 동일)
+	bsttree.delete_(8);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.delete_(18);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.delete_(11);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.delete_(5);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.delete_(15);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.delete_(4);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.delete_(9);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.delete_(1);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.delete_(7);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.delete_(17);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.delete_(6);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.delete_(14);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.delete_(10);
+	bsttree.callinorder();
+	bsttree.drawTree(); 
+	bsttree.delete_(3);
+	bsttree.callinorder();
+	bsttree.drawTree(); 
+	bsttree.delete_(19);
+	bsttree.callinorder();
+	bsttree.drawTree(); 
+	bsttree.delete_(20);
+	bsttree.callinorder();
+	bsttree.drawTree();
+
+	//재삽입 8  18  11  5  15  4  9  1  7  17  6  14  10  3  19  20
+	bsttree.insert_BST(8);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.insert_BST(18);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.insert_BST(11);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.insert_BST(5);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.insert_BST(15);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.insert_BST(4);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.insert_BST(9);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.insert_BST(1);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.insert_BST(7);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.insert_BST(17);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.insert_BST(6);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.insert_BST(14);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.insert_BST(10);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.insert_BST(3);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.insert_BST(19);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.insert_BST(20);
+	bsttree.callinorder();
+	bsttree.drawTree();
+
+	//삭제 2 (삽입 순서와 역순)
+	bsttree.delete_(20);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.delete_(19);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.delete_(3);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.delete_(10);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.delete_(14);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.delete_(6);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.delete_(17);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.delete_(7);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.delete_(1);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.delete_(9);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.delete_(4);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.delete_(15);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.delete_(5);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.delete_(11);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.delete_(18);
+	bsttree.callinorder();
+	bsttree.drawTree();
+	bsttree.delete_(8);
+	bsttree.callinorder();
+	bsttree.drawTree();
+
+}
