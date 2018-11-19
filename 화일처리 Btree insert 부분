@@ -1,493 +1,269 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define M			2
+#define M			4		//M(차수)가 3일 때
 #define MAX_STACK	100
 
-typedef struct Btree {		//차수가 m+1 인 노드
+typedef struct Btree {		//키의 개수가 M-1개 이고 차수가 M인 Btree 구조체
 	int n;
-	int key[M];
-	struct Btree *branch[M+1];
+	int key[M - 1];
+	struct Btree *branch[M];
 } Btree;
 
-typedef struct Btree1 {		//차수가 m+2 인 노드
+typedef struct Btree1 {		//키의 개수가 M개 이고 차수가 M+1인 Btree 구조체
 	int n;
-	int key[M+1];
-	struct Btree *branch[M+2];
+	int key[M];
+	struct Btree *branch[M + 1];
 } Btree1;
 
-typedef struct Btree2 {		//차수가 2*m +1인 노드
-	int n;
-	int key[2*M];
-	struct Btree *branch[2*M+1];
-} Btree2;
-
-typedef struct Btrees {		//btree노드 포인터를 가지고 있는 노드
+typedef struct Btrees {		//btree 노드 포인터를 가지고 있는 구조체
 	int n;
 	struct Btree *p;
 } Btrees;
 
-Btrees stack[MAX_STACK];
-int top=-1;
-Btree *root=NULL;
+Btrees stack[MAX_STACK];	//노드들을 담을 Stack
 
-void initStack ();
-Btrees pop();
-void push(Btrees node);
-int btree_insert (int);
- 
-void initStack () {		//stack 초기화
-	top=-1;
+int top = -1;				//top 선언
+
+Btree *root = NULL;			//Btree의 root는 NULL로 초기화
+
+void initStack();			//Stack 초기화
+
+Btrees pop();				//Stack에서 노드를 pop 해주는 함수
+
+void push(Btrees node);		//Stack에 노드를 push 해주는 함수
+
+int btree_insert(int);		//Btree에 노드를 넣는 함수
+
+void initStack() {		//Stack 초기화 함수
+	top = -1;
 }
 
-Btrees pop() {		//stack의 top에 있는 노드 pop 하는 함수
+Btrees pop() {		//Stack에서 노드를 pop 해주는 함수
 	Btrees node;
-	node=stack[top];
+	node = stack[top];
 	top--;
 	return node;
 }
 
-void push(Btrees node) {   //stack에 push 하는 함수
+void push(Btrees node) {   //Stack에 노드를 push 해주는 함수
 	top++;
-	stack[top]=node;
+	stack[top] = node;
 }
 
-int btree_insert (int data) {   // 삽입함수
-	int i,j,N,mid;
-	int found=0,finished=0;		//삽입할 공간을 찾았는지, 삽입했는지 저장할 변수
+int btree_insert(int data) {			//Btree에 노드를 넣는 함수
+	int i, j, N, mid;
+	int found = 0, finished = 0;		//삽입할 공간을 찾았는지 저장하는 found 변수와 삽입했는지 저장하는 finished 변수 선언
 
-	Btree *curr,*p,*newnode;
+	Btree *curr, *p, *newnode;			//분할 시 사용될 curr, p, newnode 선언
 	Btrees node;
-	Btree1 TOOBIG;		//오버플로우 해결하는 변수 변수
+	Btree1 TOOBIG;						//오버플로우 해결하는 변수
 
 	initStack();		//Stack 초기화
 
-	if (root==NULL) {		//루트 노드가 NULL이라면
+	if (root == NULL) {				//루트 노드가 NULL이라면
 
-		root=(Btree *)malloc(sizeof(Btree));		//루트에 대한 메모리 할당
-		root->n=1;
-		root->key[0]=data;
-		for(i=0; i<=1; i++)			//루트의 모든 branch 초기화
-			root->branch[i]=NULL;
+		root = (Btree *)malloc(sizeof(Btree));		//루트에 대한 메모리 할당
+		root->n = 1;								//루트 키 개수 1로 할당
+		root->key[0] = data;						//루트의 0번째 키를 할당
+		for (i = 0; i <= 1; i++)					//루트의 모든 branch 초기화
+			root->branch[i] = NULL;
 		return 1;
 	}
 
-	curr=root;		//root노드를 curr로 복사
-	found=0;
+	curr = root;		//root노드를 curr로 복사
+	found = 0;
 
-	//루트 노드가 NULL이 아니라면
-	do {		//들어갈 sub 위치를 찾는다.
-		p=NULL;
-		N=curr->n;		//curr의 키 개수
+	//루트 노드가 NULL이 아니라면 들어갈 branch 위치를 찾는다.
+	do {		
+		p = NULL;			//p 노드 변수 초기화
+		N = curr->n;		//curr의 키 개수를 변수 N에 저장
 
-		for(i=0; i<N; i++) {	//
-			if(curr->key[i]==data) {	//data가 이미 있다면 
-				found=1;
+		for (i = 0; i<N; i++) {	
+			if (curr->key[i] == data) {	//data가 이미 있다면 
+				found = 1;				//찾았으므로 found = 1
 				break;
 			}
-			else if(curr->key[i]>data) {	//data보다 curr의 key[i]가 더 크다면
-				p=curr->branch[i];			//p는 curr의 branch[i]로 들어간다
+			else if (curr->key[i]>data) {	//data보다 curr의 key[i]가 더 크다면
+				p = curr->branch[i];			//p는 curr의 branch[i]로 들어간다
 				break;
 			}
 		}
 
-		if (curr->key[i-1] < data && p==NULL )	//data가 curr의 key들 중 제일 클 경우
-			p=curr->branch[i];		//curr의 마지막 branch로 들어간다.
+		if (curr->key[i - 1] < data && p == NULL)	//data가 curr의 key들 중 제일 클 경우
+			p = curr->branch[i];		//curr의 마지막 branch로 들어간다.
 
-		if (p!=NULL) {		//들어갈 곳을 찾았을 경우
-			node.p=curr;
-			push(node);		//p를 stack에 넣어준다.
-			curr=p;			//p를 curr로 복사해준다.
+		if (p != NULL) {		//들어갈 곳을 찾았을 경우
+			node.p = curr;
+			push(node);			//p를 stack에 넣어준다.
+			curr = p;			//p를 curr로 복사해준다.
 		}
 
 	} while (found == 0 && p != NULL);	//삽입 위치를 아직 못 찾았다면! && p가 NULL이 아니라면!
 
-	if (found==1) return 0;		//삽입했다면
+	if (found == 1) return 0;		//삽입했다면
 
-	p=NULL;	
-	finished=0;
+	p = NULL;
+	finished = 0;
 
+	//현재 찾은 노드는 curr로 돼 있음
 	//삽입 노드가 비어있다면 삽입, 꽉 차있다면 분할
 	do {
-		if(curr->n < M){	//curr이 아직 꽉 차지 않았다면
-			for (i=0; i < curr->n ; i++) {
-				if (curr->key[i] > data) 
+
+		if (curr->n < M - 1) {					//curr이 아직 꽉 차지 않았다면
+
+			for (i = 0; i < curr->n; i++) {
+				if (curr->key[i] > data)		//curr의 key[i]가 data보다 크다면
 					break;
 			}
-			for (j=curr->n; j>i; j--) {
-				curr->key[j]=curr->key[j-1];
-				curr->branch[j+1]=curr->branch[j];
+
+			for (j = curr->n; j>i; j--) {		//curr의 키와 branch를 옮겨준다.
+				curr->key[j] = curr->key[j - 1];	
+				curr->branch[j + 1] = curr->branch[j];
 			}
-			curr->key[i]=data;
-			curr->branch[i+1]=p;
-			(curr->n)++;
+
+			curr->key[i] = data;		//curr의 key[i]에 data 삽입
+			curr->branch[i + 1] = p;	//curr의 branch[i+1]은 p가 됨
+			(curr->n)++;				//curr의 키 개수 증가
 			return 1;
 		}
+
 		else {		//삽입 노드가 꽉 차있다면 분할한다
-			TOOBIG.n=curr->n+1;		//Toobig의 키 개수는 curr의 키 개수 + 1
-			TOOBIG.branch[0]=curr->branch[0];	//Toobig의 branch[0]은 curr의 branch[0]
 
-			for (i=0; i < curr->n; i++) {	//curr의 개수 만큼 반복문 실행
+			//먼저 오버플로우 된 노드를 한 사이즈 큰 TooBig노드에 다 복사한다.
 
-				if(curr->key[i]>data) {		//curr의 key가 data보다 클 경우
-					TOOBIG.key[i]=data;		//Toobig에 키 삽입해주고
-					TOOBIG.branch[i+1]=p;	//Toobig에 삽입한 키 오른쪽 sub를 p로 설정
+			TOOBIG.n = curr->n + 1;				//Toobig의 키 개수는 curr의 키 개수 + 1
+			TOOBIG.branch[0] = curr->branch[0];	//Toobig의 branch[0]은 curr의 branch[0]
+
+			for (i = 0; i < curr->n; i++) {	//curr의 개수 만큼 반복문 실행
+
+				if (curr->key[i]>data) {		//curr의 key가 data보다 클 경우
+					TOOBIG.key[i] = data;		//Toobig에 키 삽입해주고
+					TOOBIG.branch[i + 1] = p;	//Toobig에 삽입한 키 오른쪽 sub를 p로 설정
 					break;
 				}
 				else {
-					TOOBIG.key[i]=curr->key[i];		
-					TOOBIG.branch[i+1]=curr->branch[i+1];
+					TOOBIG.key[i] = curr->key[i];				//curr의 key[i]가 Toobig의 key[i]로 들어감
+					TOOBIG.branch[i + 1] = curr->branch[i + 1];	//key[i]의 오른쪽 branch도 복사됨
 				}
 			}
 
-			if (i<M) {		//i가 M보다 작다면
-				for (j=curr->n; j>i; j--) {
-					TOOBIG.key[j]=curr->key[j-1];
-					TOOBIG.branch[j+1]=curr->branch[j];
+			if (i<M - 1) {		//i가 M - 1보다 작다면
+				for (j = curr->n; j>i; j--) {
+					TOOBIG.key[j] = curr->key[j - 1];		//curr의 key[j-1] 값은 Toobig의 key[j]에 들어간다.
+					TOOBIG.branch[j + 1] = curr->branch[j];		//curr의 branch[j]는 Toobig의 branch[j+1]에 들어간다.
 				}
 			}
-			else {
-				TOOBIG.key[i]=data;
-				TOOBIG.branch[i+1]=p;
+			else {		//Toobig의 남은 공간에 data 삽입!
+				TOOBIG.key[i] = data;
+				TOOBIG.branch[i + 1] = p;
 			}
 
-			mid=TOOBIG.n/2;		//Toobig의 키개수/2를 mid 변수에 저장
-			data=TOOBIG.key[mid];	//data는 Toobig의 중간 값
-			curr->n=mid;			//Toobig의 키개수/2는 curr의 키 개수
-			curr->branch[i]=TOOBIG.branch[0];	//Toobig의 branch[0]은 curr->branch[i]
 
-			for(i=0; i<mid; i++) {
-				curr->key[i]=TOOBIG.key[i];
-				curr->branch[i+1]=TOOBIG.branch[i+1];
+			//Toobig 노드를 만들었으니 이제 분할!
+
+			mid = TOOBIG.n / 2;		//Toobig의 키개수/2를 mid 변수에 저장
+			data = TOOBIG.key[mid];	//data는 Toobig의 중간 값
+			curr->n = mid;			//Toobig의 키개수/2는 curr의 키 개수
+
+			curr->branch[i] = TOOBIG.branch[0];	//Toobig의 branch[0]은 curr->branch[i]
+
+			for (i = 0; i<mid; i++) {	//Toobig의 mid 기준 왼쪽 키와 branch 모두 curr로 이동
+				curr->key[i] = TOOBIG.key[i];
+				curr->branch[i + 1] = TOOBIG.branch[i + 1];
 			}
 
-			newnode=(Btree *)malloc(sizeof(Btree));		//newnode 메모리 할당
-			newnode->n=mid;								//newnode의 키 개수는 mid
-			newnode->branch[0]=TOOBIG.branch[mid+1];	//newnode의 branch[0]은 Toobig[mid+1]
+			newnode = (Btree *)malloc(sizeof(Btree));		//newnode 메모리 할당
+			newnode->n = M - 1 - mid;						//newnode의 키 개수는 M - 1 - mid									
+			newnode->branch[0] = TOOBIG.branch[mid + 1];	//newnode의 branch[0]은 Toobig[mid+1]
 
-			j=0;
+			j = 0;
 
-			for(i=mid+1; i<TOOBIG.n; i++) {
-				newnode->key[j]=TOOBIG.key[i];
-				newnode->branch[++j]=TOOBIG.branch[i+1];
+			//Toobig의 mid 기준 오른쪽 값 들은 모두 newnode로 
+			for (i = mid + 1; i<TOOBIG.n; i++) {
+				newnode->key[j] = TOOBIG.key[i];
+				newnode->branch[++j] = TOOBIG.branch[i + 1];
 			}
 
-			p=newnode;
+			//여기서 newnode는 오른쪽 분할 노드
+			p = newnode;
 			if (top > -1) {		//stack이 비어있지 않다면
-				node=pop();
-				curr=node.p;
+				node = pop();
+				curr = node.p;
 			}
-			else {				//stack이 비어있다면
-				newnode=(Btree *)malloc(sizeof(Btree));
-				newnode->n=1;
-				newnode->branch[0]=root;
-				newnode->key[0]=data;
-				newnode->branch[1]=p;
-				root=newnode;
+			else {				//stack이 비어있다면 newnode 왼쪽에 root 오른쪽에 p를 연결해주며 한 단계 올린다.
+				newnode = (Btree *)malloc(sizeof(Btree));		//newnode 메모리 할당
+				newnode->n = 1;									//newnode 키개수는 1
+				newnode->branch[0] = root;						//newnode의 왼쪽 branch는 root
+				newnode->key[0] = data;							//newnode의 첫 번째 키는 data
+				newnode->branch[1] = p;							//newnode의 오른쪽 branch은 p
+				root = newnode;									//root는 newnode
 				return 1;
 			}
 		}
 
-	}while(1);
+	} while (1);
 
 }
 
-void btree_print(struct Btree *root,int depth)   // 출력함수
+void btree_inorder(struct Btree *root, int depth)   // Btree를 가장 왼쪽 subtree부터 출력해주는 함수
 {
-	int i,j;
-	if(root != NULL){
-		for(i = 0; i < root -> n; i++){
-			btree_print(root -> branch[i],depth+1);
-			for(j = 0; j < 3*depth; j++)
-				printf(" ");
-			printf("%3d\n",root -> key[i]);
+	int i, j;
+	if (root != NULL) {
+		for (i = 0; i < root->n; i++) {				//root의 키 개수만큼
+			btree_inorder(root->branch[i], depth + 1);		//root의 각 branch로 들어간다.
+			for (j = 0; j < 3 * depth; j++)
+				printf(" ");						//공백 출력
+			printf("%3d\n", root->key[i]);			//root의 key 출력
 		}
-		btree_print(root -> branch[i],depth+1);
+		btree_inorder(root->branch[i], depth + 1);	//root의 각 branch로 들어간다.
 	}
 }
 
-int btree_delete (int data) {   // 삭제 함수
-	/* 변수 선언 */
-	int i,j,k,N,mid;
-	int found=0, finished=0;
-	Btree *curr, *p, *tmp;
-	Btrees node;
-	Btree2 TWOBNODE;
-
-	initStack();
-	if (root == NULL)
-		return 0;
-	curr=root;
-	found=0;
-	do {
-		p=NULL;
-		N=curr->n;
-		for (i=0; i<N; i++) {
-			if (curr->key[i] == data) {
-				k=i;
-				found=1;
-				break;
-			}
-			else if(curr->key[i] > data) {
-				p=curr->branch[i];
-				k=i;
-				break;
-			}
-		}
-	
-		if(i-1 >= 0 && found == 0) {
-			// found=0 && p!=0 
-			if (curr->key[i-1] < data) {
-				p=curr->branch[i];
-				k=i-1;
-			}
-		
-		}
-
-		if(p != NULL) {
-			node.p=curr;
-			node.n=k;
-			push(node);
-			curr=p;
-		}
-	} while (found == 0 && p != NULL);
-
-	if (found == 0)
-		return 0;
-	if (curr->branch[k+1] != NULL) {
-		tmp=curr;
-		node.p=curr;
-		node.n=k;
-		push(node);
-		curr=curr->branch[k+1];
-		while (curr->branch[0] != NULL) {
-			node.p=curr;
-			node.n=0;
-			push(node);
-			curr=curr->branch[0];
-		}
-		tmp->key[k]=curr->key[0];
-		data=curr->key[0];
-	}
-
-	finished=0;
-	do {
-		// remove Out-key
-		j=0;
-		for (i=0; i<curr->n; i++) {
-			if (curr->key[i] != data) {
-				curr->key[j]=curr->key[i];
-				curr->branch[j+1]=curr->branch[i+1];
-				j++;
-			}
-		}
-		(curr->n)--;
-		
-		// 아니라면 현재 node가 비어있어서 node를 재분배
-		if(curr->n >0) 
-			return 1;
-		// level이 감소된 경우
-		else if (top == -1) {
-			tmp=root;
-			root=root->branch[0];
-			if(tmp)
-			free(tmp);
-			return 1;
-		}
-	
-		else if (stack[top].p->branch[stack[top].n]->n > 1 
-			|| stack[top].p->branch[stack[top].n+1]->n > 1) {
-			if(stack[top].p->branch[stack[top].n]->n > 1) {
-				// tmp는 형제 node를 포인트
-				tmp=stack[top].p->branch[stack[top].n];
-				j=0;
-				for (i=0; i < tmp->n; i++) {
-					TWOBNODE.branch[j]=tmp->branch[i];
-					TWOBNODE.key[j]=tmp->key[i];
-					j++;
-				}
-				TWOBNODE.branch[j]=tmp->branch[i];
-				TWOBNODE.key[j]=stack[top].p->key[stack[top].n];
-				j++;
-				for (i=0; i < curr->n; i++) {
-					TWOBNODE.branch[j]=curr->branch[i];
-					TWOBNODE.key[j]=curr->key[i];
-				}
-				TWOBNODE.branch[j]=curr->branch[i];
-				TWOBNODE.n=j;	// copy "best" ....
-				
-				mid=j/2;
-				for(i=0; i<mid; i++) {
-					tmp->branch[i]=TWOBNODE.branch[i];
-					tmp->key[i]=TWOBNODE.key[i];
-				}
-				tmp->branch[i]=TWOBNODE.branch[i];
-				tmp->n=mid;
-				stack[top].p->key[stack[top].n]=TWOBNODE.key[mid];
-
-				for(i=mid+1; i<TWOBNODE.n; i++) {
-					curr->branch[i-mid-1]=TWOBNODE.branch[i];
-					curr->key[i-mid-1]=TWOBNODE.key[i];
-				}
-				curr->branch[i]=TWOBNODE.branch[i];
-				curr->n=TWOBNODE.n-mid-1;
-
-			}
-			else {
-				tmp=stack[top].p->branch[stack[top].n+1];
-				j=0;
-				for (i=0; i < curr->n; i++) {
-					TWOBNODE.branch[j]=curr->branch[i];
-					TWOBNODE.key[j]=curr->key[i];
-					j++;
-				}
-				TWOBNODE.branch[j]=curr->branch[i];
-				TWOBNODE.key[j]=stack[top].p->key[stack[top].n];
-				j++;
-				for (i=0; i < tmp->n; i++) {
-					TWOBNODE.branch[j]=tmp->branch[i];
-					TWOBNODE.key[j]=tmp->key[i];
-					j++;
-				}
-				TWOBNODE.branch[j]=tmp->branch[i];
-				TWOBNODE.n=j;	
-				
-				mid=j/2;
-				for(i=0; i<mid; i++) {
-					curr->branch[i]=TWOBNODE.branch[i];
-					curr->key[i]=TWOBNODE.key[i];
-				}
-				curr->branch[i]=TWOBNODE.branch[i];
-				curr->n=mid;
-				stack[top].p->key[stack[top].n]=TWOBNODE.key[mid];
-
-				for(i=mid+1; i<TWOBNODE.n; i++) {
-					tmp->branch[i-mid-1]=TWOBNODE.branch[i];
-					tmp->key[i-mid-1]=TWOBNODE.key[i];
-				}
-				tmp->branch[i-mid-1]=TWOBNODE.branch[i];
-				tmp->n=TWOBNODE.n-mid-1;
-	
-			}
-			return 1;
-		}
-		// 삭제 종료는 안되고 부모에 영향을 준다
-		else {
-			if (stack[top].p->branch[stack[top].n]->n > 0) {
-				tmp=stack[top].p->branch[stack[top].n];
-				tmp->key[tmp->n]=stack[top].p->key[stack[top].n];
-				(tmp->n)++;
-				j=tmp->n;
-
-				for (i=0; i < curr->n; i++) {
-					tmp->branch[j+i]=curr->branch[i];
-					tmp->key[j+i]=curr->key[i];
-				}
-				tmp->branch[j+i]=curr->branch[i];
-				tmp->n=tmp->n + curr->n;
-		
-				if(curr)
-				free(curr);
-				
-				data=stack[top].p->key[stack[top].n];
-				node=pop();
-				curr=node.p;
-			}
-			else {
-				tmp=stack[top].p->branch[stack[top].n+1];
-				curr->key[curr->n]=stack[top].p->key[stack[top].n];
-				(curr->n)++;
-				j=curr->n;
-
-				for (i=0; i < tmp->n; i++) {
-					curr->branch[j+i]=tmp->branch[i];
-					curr->key[j+i]=tmp->key[i];
-				}
-				curr->branch[j+i]=tmp->branch[i];
-				curr->n=curr->n + tmp->n;
-				if(tmp)
-				free(tmp);
-
-				data=stack[top].p->key[stack[top].n];
-				node=pop();
-				curr=node.p;
-			}
-
-		}
-	} while(1);
-}
-
-int Menu(){
-	int count;
-	printf("************************************************************\n");
-	printf("   1. 삽입     2. 탐색     3. 출력     4.삭제     0. 종료   \n");
-	printf("************************************************************\n");
-	printf("Input number = ");
-	scanf("%d",&count);
-	return count;
-}
 
 void main()
 {
-	int data;
+	btree_insert(30);	btree_inorder(root, 0);	printf("-------------\n");
+	btree_insert(20);	btree_inorder(root, 0);	printf("-------------\n");
+	btree_insert(62);	btree_inorder(root, 0);	printf("-------------\n");
+	btree_insert(110);	btree_inorder(root, 0);	printf("-------------\n");
+	btree_insert(140);	btree_inorder(root, 0);	printf("-------------\n");
+	btree_insert(15);	btree_inorder(root, 0);	printf("-------------\n");
+	btree_insert(65);	btree_inorder(root, 0);	printf("-------------\n");
+	btree_insert(136);	btree_inorder(root, 0);	printf("-------------\n");
+	btree_insert(150);	btree_inorder(root, 0);	printf("-------------\n");
+	btree_insert(120);	btree_inorder(root, 0);	printf("-------------\n");
 
-/*	btree_insert(37);
-	btree_insert(24);
-	btree_insert(72);
+	btree_insert(40);	btree_inorder(root, 0);	printf("-------------\n");
+	btree_insert(132);	btree_inorder(root, 0);	printf("-------------\n");
+	btree_insert(19);	btree_inorder(root, 0);	printf("-------------\n");
+	btree_insert(128);	btree_inorder(root, 0);	printf("-------------\n");
+	btree_insert(138);	btree_inorder(root, 0);	printf("-------------\n");
+	btree_insert(100);	btree_inorder(root, 0);	printf("-------------\n");
+	btree_insert(16);	btree_inorder(root, 0);	printf("-------------\n");
+	btree_insert(145);	btree_inorder(root, 0);	printf("-------------\n");
+	btree_insert(70);	btree_inorder(root, 0);	printf("-------------\n");
+	btree_insert(42);	btree_inorder(root, 0);	printf("-------------\n");
 
-	btree_insert(90);
-	btree_insert(3);
-	btree_insert(30);
-	btree_insert(33);
+	btree_insert(69);	btree_inorder(root, 0);	printf("-------------\n");
+	btree_insert(43);	btree_inorder(root, 0);	printf("-------------\n");
+	btree_insert(26);	btree_inorder(root, 0);	printf("-------------\n");
+	btree_insert(60);	btree_inorder(root, 0);	printf("-------------\n");
+	btree_insert(130);	btree_inorder(root, 0);	printf("-------------\n");
+	btree_insert(50);	btree_inorder(root, 0);	printf("-------------\n");
+	btree_insert(18);	btree_inorder(root, 0);	printf("-------------\n");
+	btree_insert(7);	btree_inorder(root, 0);	printf("-------------\n");
+	btree_insert(36);	btree_inorder(root, 0);	printf("-------------\n");
+	btree_insert(58);	btree_inorder(root, 0);	printf("-------------\n");
 
-	btree_insert(52);
-	btree_insert(73);
-	btree_insert(100);
-
-*/
-
-	while(1){
-		switch(Menu()){
-		case 1 :
-			do {
-				printf(" Input number : ");
-				scanf("%d",&data);
-				
-				if(data>0 && btree_insert(data))
-					printf("\n %d input complate \n",data);
-				else 
-					printf("\n error input\n");
-				if(!root){
-					printf("no data!\n");
-				}
-				btree_print(root,0);
-			} while(data>0);
-			break;
-		case 3 :
-			if(!root){
-				printf("no data!\n");
-				break;
-			}
-			btree_print(root,0);
-			break;
-		case 4:
-			do {
-				printf(" Input number : ");
-				scanf("%d",&data);
-				
-				if(data>0 && btree_delete(data))
-					printf("\n %d delete complate \n",data);
-				else 
-					printf("\n error input\n");
-				if(!root){
-					printf("no data!\n");
-				}
-				btree_print(root,0);
-			} while(data>0);
-			break;
-
-		case 0 : 
-			return;
-		}
-	}
+	btree_insert(22);	btree_inorder(root, 0);	printf("-------------\n");
+	btree_insert(41);	btree_inorder(root, 0);	printf("-------------\n");
+	btree_insert(59);	btree_inorder(root, 0);	printf("-------------\n");
+	btree_insert(57);	btree_inorder(root, 0);	printf("-------------\n");
+	btree_insert(54);	btree_inorder(root, 0);	printf("-------------\n");
+	btree_insert(33);	btree_inorder(root, 0);	printf("-------------\n");
+	btree_insert(75);	btree_inorder(root, 0);	printf("-------------\n");
+	btree_insert(124);	btree_inorder(root, 0);	printf("-------------\n");
+	btree_insert(122);	btree_inorder(root, 0);	printf("-------------\n");
+	btree_insert(123);	btree_inorder(root, 0);	printf("-------------\n");
 }
