@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define M			4		//M(차수)가 3일 때
+#define M			4		//M(차수)가 4일 때
 #define MAX_STACK	100
 
 typedef struct Btree {		//키의 개수가 M-1개 이고 차수가 M인 Btree 구조체
